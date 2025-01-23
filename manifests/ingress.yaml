@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+ name: genie-app-ingress
+ namespace: genie
+ annotations:
+   nginx.ingress.kubernetes.io/ssl-redirect: "false"
+   nginx.ingress.kubernetes.io/use-regex: "true"
+   nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+ ingressClassName: nginx
+ rules:
+ - http:
+     paths:
+     - path: /(.*)
+       pathType: Prefix
+       backend:
+         service:
+           name: genie-frontend-services
+           port:
+             number: 80
