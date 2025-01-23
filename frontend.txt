@@ -1,0 +1,70 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: react-app-deployment
+# spec:
+#   replicas: 3  # Number of replicas/pods (can be adjusted as needed)
+#   selector:
+#     matchLabels:
+#       app: react-app
+#   template:
+#     metadata:
+#       labels:
+#         app: react-app
+#     spec:
+#       containers:
+#         - name: react-app
+#           image: us-central1-docker.pkg.dev/pre-onboarding-427811/genie-backend/genie-frontend:latest  # Replace with your actual Docker image (e.g., myusername/react-app:latest)
+#           ports:
+#             - containerPort: 80  # Nginx runs on port 80 in your Dockerfile
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: react-app-service
+# spec:
+#   selector:
+#     app: react-app
+#   ports:
+#     - protocol: TCP
+#       port: 80   # Service port
+#       targetPort: 80  # Container port (where Nginx serves the React app)
+#   type: LoadBalancer  # Use LoadBalancer to expose the service externally (can be NodePort or ClusterIP for internal access)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: genie-frontend-deployment
+  namespace: genie  # Deploy under the genie namespace
+spec:
+  replicas: 1  # Number of replicas/pods (can be adjusted as needed)
+  selector:
+    matchLabels:
+      app: genie-frontend
+  template:
+    metadata:
+      labels:
+        app: genie-frontend
+    spec:
+      containers:
+        - name: genie-frontend
+          image: us-central1-docker.pkg.dev/pre-onboarding-427811/genie-backend/genie-frontend:latest  # Replace with your actual image
+          ports:
+            - containerPort: 80  # Nginx serves on port 80
+      nodeSelector:
+        role: secondary  # Ensuring the deployment runs on nodes with this label
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: genie-frontend-service
+  namespace: genie  # Deploy the service in the genie namespace
+spec:
+  selector:
+    app: genie-frontend
+  ports:
+    - protocol: TCP
+      port: 80  # Service port
+      targetPort: 80  # Container port
+  type: LoadBalancer  # Expose the service externally
