@@ -1,36 +1,3 @@
-# apiVersion: apps/v1
-# kind: Deployment
-# metadata:
-#   name: react-app-deployment
-# spec:
-#   replicas: 3  # Number of replicas/pods (can be adjusted as needed)
-#   selector:
-#     matchLabels:
-#       app: react-app
-#   template:
-#     metadata:
-#       labels:
-#         app: react-app
-#     spec:
-#       containers:
-#         - name: react-app
-#           image: us-central1-docker.pkg.dev/pre-onboarding-427811/genie-backend/genie-frontend:latest  # Replace with your actual Docker image (e.g., myusername/react-app:latest)
-#           ports:
-#             - containerPort: 80  # Nginx runs on port 80 in your Dockerfile
-# ---
-# apiVersion: v1
-# kind: Service
-# metadata:
-#   name: react-app-service
-# spec:
-#   selector:
-#     app: react-app
-#   ports:
-#     - protocol: TCP
-#       port: 80   # Service port
-#       targetPort: 80  # Container port (where Nginx serves the React app)
-#   type: LoadBalancer  # Use LoadBalancer to expose the service externally (can be NodePort or ClusterIP for internal access)
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -52,19 +19,24 @@ spec:
           ports:
             - containerPort: 80  # Nginx serves on port 80
       nodeSelector:
-        role: tertiary  # Ensuring the deployment runs on nodes with this label
+        role: primary  # Ensuring the deployment runs on nodes with this label
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: genie-frontend-service
+  name: genie-frontend-services
   namespace: genie  # Deploy the service in the genie namespace
 spec:
   selector:
     app: genie-frontend
   ports:
-    - protocol: TCP
-      port: 80  # Service port
+    - name: http  # Added name for the HTTP port
+      protocol: TCP
+      port: 80
       targetPort: 80  # Container port
+    # - name: https  # Added name for the HTTPS port
+    #   protocol: TCP
+    #   port: 443
+    #   targetPort: 443  # Should match your container's SSL listening port (if applicable)
   type: LoadBalancer  # Expose the service externally
   loadBalancerIP: 35.238.73.66
